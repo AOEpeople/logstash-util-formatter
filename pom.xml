@@ -3,7 +3,7 @@
 
     <groupId>net.logstash.logging</groupId>
     <artifactId>logstash-util-formatter</artifactId>
-    <version>1.1-SNAPSHOT</version>
+    <version>1.1.AOE</version>
     <packaging>jar</packaging>
     <name>logstash-util-formatter</name>
     <description>java.util.logging Formatter that conforms to the logstash json_event format</description>
@@ -54,19 +54,6 @@
                         <id>attach-sources</id>
                         <goals>
                             <goal>jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.jacoco</groupId>
-                <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.6.3.201306030806</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>prepare-agent</goal>
-                            <goal>report</goal>
                         </goals>
                     </execution>
                 </executions>

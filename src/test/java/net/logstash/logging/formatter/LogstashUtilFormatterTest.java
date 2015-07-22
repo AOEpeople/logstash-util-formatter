@@ -89,21 +89,21 @@ public class LogstashUtilFormatterTest {
         final SimpleDateFormat dateFormat = new SimpleDateFormat(LogstashUtilFormatter.DATE_FORMAT);
         String dateString = dateFormat.format(new Date(millis));
         builder.add("@timestamp", dateString);
-        builder.add("@message", "Junit Test");
-        builder.add("@source", LogstashUtilFormatter.class.getName());
-        builder.add("@source_host", hostName);
+        builder.add("@version", 1);
+        builder.add("message", "Junit Test");
+        builder.add("logger_name", LogstashUtilFormatter.class.getName());
+        builder.add("hostname", hostName);
+        builder.add("level", Level.ALL.toString());
+        builder.add("class", LogstashUtilFormatter.class.getName());
+        builder.add("method", "testMethod");
 
         fieldsBuilder = Json.createBuilderFactory(null).createObjectBuilder();
-        fieldsBuilder.add("timestamp", millis);
-        fieldsBuilder.add("level", Level.ALL.toString());
         fieldsBuilder.add("line_number", ex.getStackTrace()[0].getLineNumber());
-        fieldsBuilder.add("class", LogstashUtilFormatter.class.getName());
-        fieldsBuilder.add("method", "testMethod");
         fieldsBuilder.add("exception_class", ex.getClass().getName());
         fieldsBuilder.add("exception_message", ex.getMessage());
         fieldsBuilder.add("stacktrace", EXPECTED_EX_STACKTRACE);
 
-        builder.add("@fields", fieldsBuilder);
+        builder.add("throwable", fieldsBuilder);
 
         JsonArrayBuilder tagsBuilder = Json.createArrayBuilder();
         tagsBuilder.add("foo");
@@ -123,11 +123,11 @@ public class LogstashUtilFormatterTest {
     }
 
     /**
-     * Test of encodeFields method, of class LogstashFormatter.
+     * Test of encodeThrowable method, of class LogstashFormatter.
      */
     @Test
-    public void testEncodeFields() {
-        JsonObjectBuilder result = instance.encodeFields(record);
+    public void testEncodeThrowable() {
+        JsonObjectBuilder result = instance.encodeThrowable(record);
         assertEquals(fieldsBuilder.build().toString(), result.build().toString());
     }
 
@@ -216,26 +216,6 @@ public class LogstashUtilFormatterTest {
     public void testGetLineNumberFromStackTrace() {
         assertEquals(0, instance.getLineNumberFromStackTrace(new StackTraceElement[0]));
         assertEquals(0, instance.getLineNumberFromStackTrace(new StackTraceElement[]{null}));
-    }
-
-    /**
-     * Test of addValue method, of class LogstashUtilFormatter.
-     */
-    @Test
-    public void testAddValue() {
-        JsonObjectBuilder builder = Json.createBuilderFactory(null).createObjectBuilder();
-        instance.addValue(builder, "key", "value");
-        assertEquals("{\"key\":\"value\"}", builder.build().toString());
-    }
-
-    /**
-     * Test of addValue method, of class LogstashUtilFormatter.
-     */
-    @Test
-    public void testAddNullValue() {
-        JsonObjectBuilder builder = Json.createBuilderFactory(null).createObjectBuilder();
-        instance.addValue(builder, "key", null);
-        assertEquals("{\"key\":\"null\"}", builder.build().toString());
     }
 
     @Test

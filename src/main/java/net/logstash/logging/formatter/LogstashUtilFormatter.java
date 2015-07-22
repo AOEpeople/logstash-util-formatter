@@ -34,11 +34,10 @@ import javax.json.JsonObjectBuilder;
  */
 public class LogstashUtilFormatter extends Formatter {
 
-    private static final JsonBuilderFactory BUILDER =
-            Json.createBuilderFactory(null);
+    private static final JsonBuilderFactory BUILDER = Json.createBuilderFactory(null);
     private static String hostName;
     private static final String[] tags = System.getProperty(
-            "net.logstash.logging.formatter.LogstashUtilFormatter.tags", "UNKNOWN").split(",");
+            "net.logstash.logging.formatter.LogstashUtilFormatter.tags", "").split(",");
 
     static final String DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSZZ";
 
@@ -62,10 +61,14 @@ public class LogstashUtilFormatter extends Formatter {
         return BUILDER
                 .createObjectBuilder()
                 .add("@timestamp", dateString)
-                .add("@message", formatMessage(record))
-                .add("@source", record.getLoggerName())
-                .add("@source_host", hostName)
-                .add("@fields", encodeFields(record))
+                .add("@version", 1)
+                .add("message", formatMessage(record))
+                .add("logger_name", record.getLoggerName())
+                .add("hostname", hostName)
+                .add("level", record.getLevel().toString())
+                .add("class", getValue(record.getSourceClassName()))
+                .add("method", getValue(record.getSourceMethodName()))
+                .add("throwable", encodeThrowable(record))
                 .add("@tags", tagsBuilder.build())
                 .build()
                 .toString() + "\n";
@@ -87,18 +90,14 @@ public class LogstashUtilFormatter extends Formatter {
     }
 
     /**
-     * Enocde all addtional fields.
+     * Enocde a possible throwable
      *
      * @param record the log record
      * @return objectBuilder
      */
-    final JsonObjectBuilder encodeFields(final LogRecord record) {
+    final JsonObjectBuilder encodeThrowable(final LogRecord record) {
         JsonObjectBuilder builder = BUILDER.createObjectBuilder();
-        builder.add("timestamp", record.getMillis());
-        builder.add("level", record.getLevel().toString());
         builder.add("line_number", getLineNumber(record));
-        addSourceClassName(record, builder);
-        addSourceMethodName(record, builder);
         addThrowableInfo(record, builder);
         return builder;
     }
@@ -155,20 +154,8 @@ public class LogstashUtilFormatter extends Formatter {
         return lineNumber;
     }
 
-    final void addValue(final JsonObjectBuilder builder, final String key, final String value) {
-        if (value != null) {
-            builder.add(key, value);
-        } else {
-            builder.add(key, "null");
-        }
-    }
-
-    private void addSourceMethodName(final LogRecord record, final JsonObjectBuilder builder) {
-        addValue(builder, "method", record.getSourceMethodName());
-    }
-
-    private void addSourceClassName(final LogRecord record, final JsonObjectBuilder builder) {
-        addValue(builder, "class", record.getSourceClassName());
+    private String getValue(final String value) {
+        return (value != null) ? value : "null";
     }
 
     private void addStacktraceElements(final LogRecord record, final JsonObjectBuilder builder) {
