@@ -137,6 +137,7 @@ public class LogstashUtilFormatterTest {
     @Test
     public void testAddThrowableInfo() {
         final String expected = Json.createBuilderFactory(null).createObjectBuilder()
+            .add("line_number", 42)
             .add("exception_class", ex.getClass().getName())
             .add("exception_message", ex.getMessage())
             .add("stacktrace", EXPECTED_EX_STACKTRACE)
@@ -163,6 +164,7 @@ public class LogstashUtilFormatterTest {
     @Test
     public void testAddThrowableInfoThrowableAttachedButWithoutSourceClassName() {
         final String expected = Json.createBuilderFactory(null).createObjectBuilder()
+                .add("line_number", 42)
                 .add("exception_message", ex.getMessage())
                 .add("stacktrace", EXPECTED_EX_STACKTRACE)
                 .build().toString();
@@ -183,6 +185,7 @@ public class LogstashUtilFormatterTest {
         record.setThrown(ex2);
 
         final String expected = Json.createBuilderFactory(null).createObjectBuilder()
+                .add("line_number", 0)
                 .add("exception_class", ex2.getClass().getName())
                 .add("stacktrace", "java.lang.Exception\n")
                 .build().toString();

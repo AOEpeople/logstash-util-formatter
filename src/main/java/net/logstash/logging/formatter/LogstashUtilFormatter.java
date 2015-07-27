@@ -55,7 +55,7 @@ public class LogstashUtilFormatter extends Formatter {
         final String dateString = dateFormat.format(new Date(record.getMillis()));
         final JsonArrayBuilder tagsBuilder = BUILDER.createArrayBuilder();
         for (final String tag : tags) {
-            tagsBuilder.add(tag);
+            if (tag.length() > 0) tagsBuilder.add(tag);
         }
 
         return BUILDER
@@ -97,7 +97,6 @@ public class LogstashUtilFormatter extends Formatter {
      */
     final JsonObjectBuilder encodeThrowable(final LogRecord record) {
         JsonObjectBuilder builder = BUILDER.createObjectBuilder();
-        builder.add("line_number", getLineNumber(record));
         addThrowableInfo(record, builder);
         return builder;
     }
@@ -110,6 +109,7 @@ public class LogstashUtilFormatter extends Formatter {
      */
     final void addThrowableInfo(final LogRecord record, final JsonObjectBuilder builder) {
         if (record.getThrown() != null) {
+            builder.add("line_number", getLineNumber(record));
             if (record.getSourceClassName() != null) {
                 builder.add("exception_class",
                         record.getThrown().getClass().getName());
